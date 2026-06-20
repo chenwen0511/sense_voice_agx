@@ -1,0 +1,71 @@
+[06/20/2026-15:30:49] [TRT] [W] Using an engine plan file across different models of devices is not recommended and is likely to affect performance or even cause errors.
+模型目录 : /home/admin/stephen/02-weight/SenseVoiceSmall
+引擎路径 : acc/model_fp16.plan
+输入音频 : /home/admin/stephen/02-weight/SenseVoiceSmall/example/en.mp3
+语言     : en
+ITN      : True
+TensorRT : 10.3.0
+预热次数 : 10
+推理次数 : 30
+--------------------------------------------------
+引擎加载耗时: 9.75s
+特征后端   : torch-kaldi-gpu
+特征提取（一次性）: 18.12 ms (load=8.82, feat=9.30)
+预热推理 10 次...
+  warmup 1/10 done
+  warmup 2/10 done
+  warmup 3/10 done
+  warmup 4/10 done
+  warmup 5/10 done
+  warmup 6/10 done
+  warmup 7/10 done
+  warmup 8/10 done
+  warmup 9/10 done
+  warmup 10/10 done
+
+批量推理 30 次（计时）...
+  run 1/30: e2e=70.62 ms, trt=46.30 ms, decode=6.20 ms
+  run 2/30: e2e=71.84 ms, trt=41.87 ms, decode=11.85 ms
+  run 3/30: e2e=71.95 ms, trt=47.13 ms, decode=6.70 ms
+  run 4/30: e2e=71.50 ms, trt=46.38 ms, decode=7.00 ms
+  run 5/30: e2e=67.68 ms, trt=41.96 ms, decode=7.60 ms
+  run 6/30: e2e=67.44 ms, trt=41.79 ms, decode=7.53 ms
+  run 7/30: e2e=67.84 ms, trt=42.30 ms, decode=7.42 ms
+  run 8/30: e2e=68.88 ms, trt=41.86 ms, decode=8.90 ms
+  run 9/30: e2e=68.56 ms, trt=42.00 ms, decode=8.44 ms
+  run 10/30: e2e=67.91 ms, trt=42.19 ms, decode=7.60 ms
+  run 11/30: e2e=67.38 ms, trt=41.83 ms, decode=7.43 ms
+  run 12/30: e2e=67.83 ms, trt=42.11 ms, decode=7.60 ms
+  run 13/30: e2e=67.60 ms, trt=41.90 ms, decode=7.58 ms
+  run 14/30: e2e=71.65 ms, trt=41.85 ms, decode=11.67 ms
+  run 15/30: e2e=68.69 ms, trt=41.91 ms, decode=8.66 ms
+  run 16/30: e2e=67.85 ms, trt=41.94 ms, decode=7.80 ms
+  run 17/30: e2e=71.01 ms, trt=42.04 ms, decode=10.86 ms
+  run 18/30: e2e=70.90 ms, trt=41.86 ms, decode=10.92 ms
+  run 19/30: e2e=70.93 ms, trt=41.90 ms, decode=10.92 ms
+  run 20/30: e2e=70.66 ms, trt=41.91 ms, decode=10.64 ms
+  run 21/30: e2e=66.80 ms, trt=41.71 ms, decode=6.97 ms
+  run 22/30: e2e=69.61 ms, trt=41.77 ms, decode=9.72 ms
+  run 23/30: e2e=67.48 ms, trt=41.90 ms, decode=7.46 ms
+  run 24/30: e2e=67.96 ms, trt=42.00 ms, decode=7.84 ms
+  run 25/30: e2e=68.39 ms, trt=42.34 ms, decode=7.93 ms
+  run 26/30: e2e=67.72 ms, trt=41.91 ms, decode=7.69 ms
+  run 27/30: e2e=67.94 ms, trt=42.07 ms, decode=7.75 ms
+  run 28/30: e2e=69.25 ms, trt=41.84 ms, decode=9.29 ms
+  run 29/30: e2e=71.38 ms, trt=43.02 ms, decode=10.24 ms
+  run 30/30: e2e=68.31 ms, trt=42.26 ms, decode=7.94 ms
+
+=== TensorRT + GPU 特征 推理时长统计 ===
+音频: /home/admin/stephen/02-weight/SenseVoiceSmall/example/en.mp3
+引擎: acc/model_fp16.plan
+特征后端: torch-kaldi-gpu
+TensorRT: 10.3.0
+有效推理次数: 30
+特征提取（一次性）: 18.12 ms
+端到端估算 (ms): min=66.80, max=71.95, avg=69.12, p50=68.47
+TRT encoder (ms): min=41.71, max=47.13, avg=42.46, p50=41.92
+CTC 解码 (ms): min=6.20, max=11.85, avg=8.54, p50=7.82
+端到端 stdev (ms): 1.65
+30 次 TRT 总时长: 1.274 s
+
+最后一次识别结果: The tribal chieftain called for the boy and presented him with 50 pieces of gold.

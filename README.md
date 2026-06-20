@@ -128,31 +128,41 @@ python acc/infer_trt.py \
 
 > Orin 使用系统 TensorRT **10.3.0**，**不要** `pip install tensorrt`（会装 11.x 导致引擎无法加载）。
 
+### 第二步：GPU 特征提取（acc2/）
+
+在 TRT 基础上将 Fbank + LFR + CMVN 移到 GPU，详见 [acc2/acc2.md](acc2/acc2.md)。
+
+```bash
+python acc2/infer_trt_feat.py \
+  --engine acc/model_fp16.plan \
+  --audio /home/admin/stephen/02-weight/SenseVoiceSmall/example/en.mp3 \
+  --language en --warmup 10 --runs 30 \
+  2>&1 | tee infer_trt_feat.log
+```
+
 ---
 
 ## 加速效果对比（Orin AGX 实测）
 
 测试音频：`example/en.mp3`（约 7.2 s）、`cuda:0`、预热 10 次、计时 30 次、`language=en`。
 
-| 指标 | PyTorch `infer.py` | TensorRT `acc/infer_trt.py` | 变化 |
-|------|-------------------|----------------------------|------|
-| 运行时加载 | 3.87 s | 11.56 s（引擎） | TRT 首载更慢 |
-| 特征提取 | 每次推理内含 | 一次性 76.40 ms | 预热后复用 |
-| **端到端 avg** | **180.27 ms** | **129.35 ms** | **↑ 1.39×（-28%）** |
-| 端到端 p50 | 178.46 ms | 129.36 ms | |
-| 端到端 stdev | 6.83 ms | 1.47 ms | TRT 更稳定 |
-| Encoder 段 | 含在端到端内 | **45.11 ms**（TRT） | 可单独观测 |
-| CTC 解码 | 含在端到端内 | 7.84 ms | |
-| 30 次总耗时 | 5.408 s | TRT 段 1.353 s | |
-| 识别结果 | The tribal chieftain called for the boy and presented him with 50 pieces of gold. | 一致 | ✓ |
+| 指标 | PyTorch `infer.py` | TRT `acc/infer_trt.py` | TRT+GPU特征 `acc2/` | 
+|------|-------------------|------------------------|---------------------|
+| 特征提取（一次性） | 含在端到端 | 76.40 ms | **18.12 ms** |
+| **端到端 avg** | **180.27 ms** | **129.35 ms** | **69.12 ms** |
+| TRT encoder avg | — | 45.11 ms | 42.46 ms |
+| 识别结果 | ✓ | ✓ | ✓ |
+
+相对 PyTorch 端到端加速约 **2.6×**（180 ms → 69 ms）。
 
 ```
-链路说明：
-  PyTorch  ：每次 = 特征 + PyTorch Encoder + 解码  →  avg 180 ms
-  TensorRT ：一次特征 76 ms + 预热后每次 TRT 45 ms + 解码 8 ms  →  avg 129 ms
+链路演进（en.mp3）：
+  PyTorch     ：avg 180 ms
+  TRT + CPU特征：avg 129 ms（Encoder TRT）
+  TRT + GPU特征：avg  69 ms（特征 GPU + 无 CPU↔GPU 拷贝）
 ```
 
-完整日志：[infer_torch.log](infer_torch.log)、[infer_trt.log](infer_trt.log)。
+完整日志：[infer_torch.log](infer_torch.log)、[infer_trt.log](infer_trt.log)、[infer_trt_feat.log](infer_trt_feat.log)。
 
 ### PyTorch 基线（infer_torch.log）
 
@@ -162,14 +172,13 @@ python acc/infer_trt.py \
 | min / max | 175.43 / 212.66 ms |
 | stdev | 6.83 ms |
 
-### TensorRT（infer_trt.log）
+### TRT + GPU 特征（infer_trt_feat.log）
 
 | 指标 | 数值 |
 |------|------|
-| 端到端 avg / p50 | 129.35 / 129.36 ms |
-| TRT encoder avg / p50 | 45.11 / 45.37 ms |
-| CTC 解码 avg | 7.84 ms |
-| min / max（端到端） | 127.22 / 134.21 ms |
+| 特征一次性 | 18.12 ms |
+| 端到端 avg / p50 | 69.12 / 68.47 ms |
+| TRT encoder avg | 42.46 ms |
 
 ### 中文样本 `zh.mp3`（PyTorch 参考）
 
@@ -185,16 +194,17 @@ python acc/infer_trt.py \
 sense_voice_agx/
 ├── infer.py              # PyTorch 基线推理
 ├── infer_torch.log       # PyTorch benchmark 日志
-├── infer_trt.log         # TensorRT benchmark 日志
+├── infer_trt.log         # TRT + CPU 特征 benchmark
+├── infer_trt_feat.log    # TRT + GPU 特征 benchmark
 ├── setup_env.sh
-├── torchaudio_stub/     # Jetson torchaudio 兼容层
-├── lib/                  # cuSPARSELt
-├── acc/
-│   ├── acc.md            # TensorRT 加速文档
-│   ├── export_onnx.py    # ONNX 导出
-│   ├── build_trt.sh      # 引擎构建
-│   ├── infer_trt.py      # TRT 推理 + benchmark
-│   └── model_fp16.plan   # TRT 引擎（构建产物）
+├── torchaudio_stub/
+├── lib/
+├── acc/                  # 第一步：Encoder TRT
+├── acc2/                 # 第二步：GPU 特征提取
+│   ├── acc2.md
+│   ├── feat_gpu.py
+│   ├── infer_trt_feat.py
+│   └── verify_feat.py
 ├── requirements.txt
 └── venv/
 ```
