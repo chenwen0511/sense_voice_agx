@@ -8,5 +8,6 @@ dist/
 build/
 lib/
 
+dist/
 *.plan
 *.onnx

@@ -2,6 +2,40 @@
 
 在 NVIDIA Orin AGX 端侧算力上进行 **SenseVoice-Small** 语音推理的项目。
 
+## 部署流程
+
+### 1. 开发机：打包权重
+
+```bash
+bash scripts/pack_weights.sh
+# 输出 dist/SenseVoiceSmall.tar.gz（约 1.8G），交给部署人员
+```
+
+### 2. 部署人员：手动放置权重与代码
+
+将以下内容放到目标 AGX：
+
+- 权重包：`/home/ubuntu/stephen/02-weight/SenseVoiceSmall.tar.gz`
+- 项目代码：`/home/ubuntu/stephen/01-code/sense_voice_agx/`
+
+### 3. 目标机：一键安装
+
+```bash
+cd /home/ubuntu/stephen/01-code/sense_voice_agx
+bash scripts/install.sh
+```
+
+`install.sh` 会自动：解压权重 → 安装依赖 → 构建 TRT 引擎 → 冒烟测试。
+
+路径可通过环境变量覆盖，例如：
+
+```bash
+export WEIGHT_BASE=/home/ubuntu/stephen/02-weight
+export SENSEVOICE_MODEL_DIR=/home/ubuntu/stephen/02-weight/SenseVoiceSmall
+```
+
+---
+
 ## 环境要求
 
 - JetPack 6.x（本机：R36.4 / CUDA 12.6）
@@ -206,6 +240,10 @@ sense_voice_agx/
 │   ├── infer_trt_feat.py
 │   └── verify_feat.py
 ├── requirements.txt
+├── scripts/
+│   ├── pack_weights.sh   # 打包权重
+│   ├── unpack_weights.sh # 解压权重
+│   └── install.sh        # 一键安装
 └── venv/
 ```
 
